@@ -2,9 +2,9 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 from lyricsgenius import Genius
+import requests
 
 Genius_API = st.secrets['GENIUS_API']
-
 
 st.set_page_config(page_title='SpotifyData', page_icon='🎵', layout="wide")
 
@@ -44,18 +44,29 @@ def getLyricsTop3(artist: str, *songs):
     
     return lyrics_dict
 
+@st.cache_data
+def getSong():
+    genius = Genius(Genius_API)
+    output = genius.search_album("Pleśń","Guzior")
+    return output.to_dict()
+
 def main():
 
+    cos = getSong()
+    st.image(cos["cover_art_thumbnail_url"])
+
     with st.sidebar:
+
         dane = st.file_uploader(label='Prześlij plik',type={"csv", "txt","json"})
+        moje_example = st.sidebar.checkbox("Wczytaj dane przykładowe (moje💀)")
+        if moje_example:
+            dane = 'Data\MyAwfulMusicTaste.json'
+
         st.info('Obsługiwany plik to (StreamingHistory_music_0.json),jest to historia odtwarzania Spotify, którą możesz pobrać [tutaj](https://www.spotify.com/us/account/privacy/)',icon='🤓')
 
     if dane is not None:
         
         dane = load_data(dane)
-        dane.style.set_properties({'font-family': 'Monocraft','color': '#ffffff'})
-        dane
-
 
         with st.sidebar:
             st.markdown(f"Struktura tabeli:")
