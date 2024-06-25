@@ -52,13 +52,10 @@ def getSong():
 
 def main():
 
-    cos = getSong()
-    st.image(cos["cover_art_thumbnail_url"])
-
     with st.sidebar:
 
         dane = st.file_uploader(label='Prześlij plik',type={"csv", "txt","json"})
-        moje_example = st.sidebar.checkbox("Wczytaj dane przykładowe (moje💀)")
+        moje_example = st.sidebar.checkbox("Wczytaj dane przykładowe (💀)")
         if moje_example:
             dane = 'Data\MyAwfulMusicTaste.json'
 
@@ -73,35 +70,50 @@ def main():
             st.markdown(f"**{dane.shape[1]}** - kolumny")
             st.markdown(f"**{dane.shape[0]}** - wiersze")
 
-            
+
 
         chosen_artist = st.sidebar.multiselect("Artyści których słuchałeś: ",options=dane.artistName.unique(),placeholder="Wybierz artystę")
         st.sidebar.multiselect(label="Ich piosenki: ",options=dane['trackName'].loc[dane['artistName'].isin(chosen_artist)].unique(),placeholder="Wybierz utwór")
         
-            
-
-        if st.checkbox("Staty Top 5",value=True):
-            col1,col2 = st.columns(2)
-            
-            track_play_time = (dane.groupby(['trackName','artistName'])['msPlayed']
+        track_play_time = (dane.groupby(['trackName','artistName'])['msPlayed']
                                 .sum(numeric_only=True)
                                 .sort_values(ascending=False)
                                 .reset_index()) 
             
-            artist_play_time = (dane.groupby('artistName')['msPlayed']
+        artist_play_time = (dane.groupby('artistName')['msPlayed']
                                 .sum()
                                 .sort_values(ascending=False)
-                                .reset_index()) 
-            
-            #Zmiana kolumny msPlayed na minPlayed i formatowanie msPlayed do %H%M%S w kolumnie HrMinSec
-            track_play_time['msPlayed'] = round(track_play_time['msPlayed']/60000,2)
-            track_play_time.columns = ['trackName','artistName','minPlayed']
-            track_play_time['HrMinSec'] = pd.to_datetime((track_play_time['minPlayed'].apply(format_minutes)),format='%H:%M:%S').dt.time
-            
-            artist_play_time['msPlayed'] = round(artist_play_time['msPlayed']/60000,2)
-            artist_play_time.columns = ['artistName','minPlayed']
-            artist_play_time['HrMinSec'] = pd.to_datetime((artist_play_time['minPlayed'].apply(format_minutes)),format='%H:%M:%S').dt.time
+                                .reset_index())
+        
+        #Zmiana kolumny msPlayed na minPlayed i formatowanie msPlayed do %H%M%S w kolumnie HrMinSec
+        track_play_time['msPlayed'] = round(track_play_time['msPlayed']/60000,2)
+        track_play_time.columns = ['trackName','artistName','minPlayed']
+        track_play_time['HrMinSec'] = pd.to_datetime((track_play_time['minPlayed'].apply(format_minutes)),format='%H:%M:%S').dt.time
+        
+        artist_play_time['msPlayed'] = round(artist_play_time['msPlayed']/60000,2)
+        artist_play_time.columns = ['artistName','minPlayed']
+        artist_play_time['HrMinSec'] = pd.to_datetime((artist_play_time['minPlayed'].apply(format_minutes)),format='%H:%M:%S').dt.time
 
+
+        #Sunburst chart filtering
+        artists_to_exclude = track_play_time.groupby('artistName')['minPlayed'].sum()
+        artists_to_exclude = artists_to_exclude[artists_to_exclude <=60].index
+
+        sunData = track_play_time[~track_play_time['artistName'].isin(artists_to_exclude)]
+            
+        sunBurst = px.sunburst(sunData, 
+                  path=['artistName', 'trackName'], 
+                  values='minPlayed', 
+                  title="Rozbłysk słońca (sunburst) wykres artystów i ich piosenek")
+
+        sunCheck = st.checkbox("Sunburst chart, mega cool ale potencjalnie zamuli strone 🤓☝️")
+        
+        if sunCheck:
+            st.plotly_chart(sunBurst)
+
+        if st.checkbox("Staty Top 5",value=True):
+            col1,col2 = st.columns(2)
+            
             top_5_tracks = track_play_time.head(5)
             others_tracks = pd.DataFrame([{
                 'trackName':'Others',
