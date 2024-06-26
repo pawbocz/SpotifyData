@@ -45,10 +45,31 @@ def getLyricsTop3(artist: str, *songs):
     return lyrics_dict
 
 @st.cache_data
-def getSong():
+def getAlbumInfo(artist:str,album:str):
     genius = Genius(Genius_API)
-    output = genius.search_album("Pleśń","Guzior")
-    return output.to_dict()
+    albumResponse = genius.search_album(album,artist).to_dict()
+    
+    cleanDict = {'albumInfo':[{
+                               'author':albumResponse['artist']['name'],
+                               'authorID':albumResponse['artist']['id'],
+                               'albumName':albumResponse['name'],
+                               'albumID':albumResponse['id'],
+                               'coverArt':albumResponse['cover_art_thumbnail_url']
+                               }]}
+    tracks = {}
+    for track in albumResponse['tracks']:
+        cleanedLyrics = track['song']['lyrics'].replace('\n', ' ')
+        cleanedTitle = track['song']['title'].replace('\u200b', '')
+
+        tracks[cleanedTitle] = [{
+                                'trackCoverArt':track['song']['song_art_image_thumbnail_url'],
+                                "id":track['song']['id'],
+                                "lyrics":cleanedLyrics}]
+        
+    cleanDict['tracks'] = tracks
+
+    return cleanDict
+    
 
 def main():
 
