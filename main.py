@@ -103,18 +103,27 @@ def complexLayoutMatplot():
         ax1.text(x_positions[i], y_position_value, f'{value:,}', ha='center', va='center', color='yellow', fontsize=24, fontweight='bold')
 
     ax5 = fig.add_subplot(gs[1, 4])
-    ax5.imshow(plt.imread(r'Data\plesn.png'))
-    ax5.axis('off')
+    artistArt = plt.imread(r'Data\plesn.png')
+    ax5.imshow(artistArt)
 
     ax6 = fig.add_subplot(gs[1, 5])
-    ax6.text(0, 1,s="TOP ARTISTS",fontsize=16,ha='left',va='top')
-    ax6.text(0, 1,s="\nGuzior\nChivas\nKukon\nPROBLEM",fontsize=14,ha='left',va='top')
+    ax6.text(0, 0.96,s="TOP ARTISTS",fontsize=14,ha='left',va='top',**{'fontweight': 'bold'},color='yellow')
+    ax6.text(0, 0.92,s="\nGuzior\nChivas\nKukon\nPROBLEM\nWhite 2115",fontsize=14,ha='left',va='top',color='yellow')
+    ax6.set_facecolor('black')
+    ax6.axis('off')
     ax10_5 = fig.add_subplot(gs[2, 6:8])
     
 
 
     ax7 = fig.add_subplot(gs[1, 6])
+    songArt = plt.imread(r'Data\fala.png')
+    ax7.imshow(songArt)
+    
     ax8 = fig.add_subplot(gs[1, 7])
+    ax8.text(0, 0.96,s="TOP SONGS",fontsize=14,ha='left',va='top',**{'fontweight': 'bold'},color='yellow')
+    ax8.text(0, 0.92,s="\nFALA\nNarcyz\nHalo\nCalifornia\nanyżowe żelki",fontsize=14,ha='left',va='top',color='yellow')
+    ax8.set_facecolor('black')
+    ax8.axis('off')
 
     # Add the larger plots in the middle
     ax9 = fig.add_subplot(gs[2, :4])
@@ -132,8 +141,8 @@ def complexLayoutMatplot():
     ax19 = fig.add_subplot(gs[4, 6])
     ax20 = fig.add_subplot(gs[4, 7])
 
-    for ax in [ ax5, ax6, ax7, ax8, ax9, ax10,ax10_5, ax11, ax12, ax13, ax14, ax15, ax16,ax17,ax18,ax19,ax20]:
-        ax.plot([0, 1], [0, 1], color='white')  # Example plot data
+    for ax in [ ax5,ax7, ax9,ax6,ax8, ax10,ax10_5, ax11, ax12, ax13, ax14, ax15, ax16,ax17,ax18,ax19,ax20]:
+        
         ax.set_facecolor('#003554')
         ax.set_xlabel('',color='#eaeaea')
         ax.set_ylabel('',color='#eaeaea')
@@ -142,7 +151,7 @@ def complexLayoutMatplot():
 
     fig.patch.set_facecolor('#333333')
     plt.rcParams['text.antialiased'] = False
-    
+    plt.rcParams['font.family'] = 'Verdana'
     plt.tight_layout()
     fig.subplots_adjust(top=0.95)  # Adjust the top margin to make space for a main title
 
