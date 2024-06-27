@@ -4,6 +4,11 @@ import pandas as pd
 from lyricsgenius import Genius
 import requests
 
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+
+
+
 Genius_API = st.secrets['GENIUS_API']
 
 st.set_page_config(page_title='SpotifyData', page_icon='🎵', layout="wide")
@@ -70,6 +75,44 @@ def getAlbumInfo(artist:str,album:str):
 
     return cleanDict
     
+def complexLayoutMatplot():
+    fig = plt.figure(figsize=(10, 12))
+
+    gs =gridspec.GridSpec(5,4,figure=fig)
+
+    title_intro = fig.add_subplot(gs[0:])
+    title_intro.text(0.5,0.5,"Jakiś tekst",ha='center',va='center',fontsize=20)
+    title_intro.axis('off')
+
+    ax1 = fig.add_subplot(gs[1, 0])  # First cell in the second row
+    ax2 = fig.add_subplot(gs[1, 1])  # Second cell in the second row
+    ax3 = fig.add_subplot(gs[1, 2])  # Third cell in the second row
+    ax4 = fig.add_subplot(gs[1, 3])  # Fourth cell in the second row
+
+    ax5 = fig.add_subplot(gs[2, :2])  # Spans first two columns in the third row
+    ax6 = fig.add_subplot(gs[2, 2:])  # Spans last two columns in the third row
+    ax7 = fig.add_subplot(gs[3, :2])  # Spans first two columns in the fourth row
+    ax8 = fig.add_subplot(gs[3, 2:])  # Spans last two columns in the fourth row
+
+    ax9 = fig.add_subplot(gs[4, 0])  # First cell in the fifth row
+    ax10 = fig.add_subplot(gs[4, 1])  # Second cell in the fifth row
+    ax11 = fig.add_subplot(gs[4, 2])  # Third cell in the fifth row
+    ax12 = fig.add_subplot(gs[4, 3])  # Fourth cell in the fifth row
+
+    for ax in [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8, ax9, ax10, ax11, ax12]:
+        ax.plot([0, 1], [0, 1])  # Example plot data
+        ax.set_facecolor('#003554')
+        ax.set_xlabel('')
+        ax.set_ylabel('')
+        ax.set_xticks([])  # Hide x-axis tick labels
+        ax.set_yticks([])  # Hide y-axis tick labels
+
+    fig.patch.set_facecolor('#051923')
+    
+    plt.tight_layout()
+    fig.subplots_adjust(top=0.95)  # Adjust the top margin to make space for a main title
+
+    st.pyplot(fig)
 
 def main():
 
@@ -127,10 +170,10 @@ def main():
                   values='minPlayed', 
                   title="Rozbłysk słońca (sunburst) wykres artystów i ich piosenek")
 
-        sunCheck = st.checkbox("Sunburst chart, mega cool ale potencjalnie zamuli strone 🤓☝️")
-        
-        if sunCheck:
+        if st.checkbox("Sunburst chart, mega cool ale potencjalnie zamuli strone 🤓☝️"):
             st.plotly_chart(sunBurst)
+
+        complexLayoutMatplot()
 
         if st.checkbox("Staty Top 5",value=True):
             col1,col2 = st.columns(2)
