@@ -76,38 +76,72 @@ def getAlbumInfo(artist:str,album:str):
     return cleanDict
     
 def complexLayoutMatplot():
-    fig = plt.figure(figsize=(10, 12))
+    fig = plt.figure(figsize=(16, 10),dpi=400)
 
-    gs =gridspec.GridSpec(5,4,figure=fig)
+    # Define GridSpec with 5 rows and 8 columns
+    gs = gridspec.GridSpec(5, 8, figure=fig,hspace=0.05, wspace=0.05)
 
-    title_intro = fig.add_subplot(gs[0:])
-    title_intro.text(0.5,0.5,"Jakiś tekst",ha='center',va='center',fontsize=20)
-    title_intro.axis('off')
+    # Add the large text area at the top
+    ax_text = fig.add_subplot(gs[0, :])
+    ax_text.text(0.5, 0.5, 'Text 1', ha='center', va='center', fontsize=20)
+    ax_text.axis('off')
 
-    ax1 = fig.add_subplot(gs[1, 0])  # First cell in the second row
-    ax2 = fig.add_subplot(gs[1, 1])  # Second cell in the second row
-    ax3 = fig.add_subplot(gs[1, 2])  # Third cell in the second row
-    ax4 = fig.add_subplot(gs[1, 3])  # Fourth cell in the second row
+    # Add the smaller plots in the middle
+    ax1 = fig.add_subplot(gs[1, 0:4])
+    metricsData = {
+    "Unique tracks": 2584,
+    "Unique artists": 870,
+    "Unique albums": 1518,
+    "Unique genres": 191}
+    ax1.set_facecolor('black')
+    ax1.axis('off')
+    x_positions = [0.1, 0.35, 0.6, 0.85]
+    y_position_label = 0.5
+    y_position_value = 0.8
+    for i, (label, value) in enumerate(metricsData.items()):
+        ax1.text(x_positions[i], y_position_label, label, ha='center', va='center', color='white', fontsize=12)
+        ax1.text(x_positions[i], y_position_value, f'{value:,}', ha='center', va='center', color='yellow', fontsize=24, fontweight='bold')
 
-    ax5 = fig.add_subplot(gs[2, :2])  # Spans first two columns in the third row
-    ax6 = fig.add_subplot(gs[2, 2:])  # Spans last two columns in the third row
-    ax7 = fig.add_subplot(gs[3, :2])  # Spans first two columns in the fourth row
-    ax8 = fig.add_subplot(gs[3, 2:])  # Spans last two columns in the fourth row
+    ax5 = fig.add_subplot(gs[1, 4])
+    ax5.imshow(plt.imread(r'Data\plesn.png'))
+    ax5.axis('off')
 
-    ax9 = fig.add_subplot(gs[4, 0])  # First cell in the fifth row
-    ax10 = fig.add_subplot(gs[4, 1])  # Second cell in the fifth row
-    ax11 = fig.add_subplot(gs[4, 2])  # Third cell in the fifth row
-    ax12 = fig.add_subplot(gs[4, 3])  # Fourth cell in the fifth row
+    ax6 = fig.add_subplot(gs[1, 5])
+    ax6.text(0, 1,s="TOP ARTISTS",fontsize=16,ha='left',va='top')
+    ax6.text(0, 1,s="\nGuzior\nChivas\nKukon\nPROBLEM",fontsize=14,ha='left',va='top')
+    ax10_5 = fig.add_subplot(gs[2, 6:8])
+    
 
-    for ax in [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8, ax9, ax10, ax11, ax12]:
-        ax.plot([0, 1], [0, 1])  # Example plot data
+
+    ax7 = fig.add_subplot(gs[1, 6])
+    ax8 = fig.add_subplot(gs[1, 7])
+
+    # Add the larger plots in the middle
+    ax9 = fig.add_subplot(gs[2, :4])
+    ax10 = fig.add_subplot(gs[2, 4:6])
+    ax11 = fig.add_subplot(gs[3, :4])
+    ax12 = fig.add_subplot(gs[3, 4:])
+
+    # Add the bottom smaller plots
+    ax13 = fig.add_subplot(gs[4, 0])
+    ax14 = fig.add_subplot(gs[4, 1])
+    ax15 = fig.add_subplot(gs[4, 2])
+    ax16 = fig.add_subplot(gs[4, 3])
+    ax17 = fig.add_subplot(gs[4, 4])
+    ax18 = fig.add_subplot(gs[4, 5])
+    ax19 = fig.add_subplot(gs[4, 6])
+    ax20 = fig.add_subplot(gs[4, 7])
+
+    for ax in [ ax5, ax6, ax7, ax8, ax9, ax10,ax10_5, ax11, ax12, ax13, ax14, ax15, ax16,ax17,ax18,ax19,ax20]:
+        ax.plot([0, 1], [0, 1], color='white')  # Example plot data
         ax.set_facecolor('#003554')
-        ax.set_xlabel('')
-        ax.set_ylabel('')
+        ax.set_xlabel('',color='#eaeaea')
+        ax.set_ylabel('',color='#eaeaea')
         ax.set_xticks([])  # Hide x-axis tick labels
         ax.set_yticks([])  # Hide y-axis tick labels
 
-    fig.patch.set_facecolor('#051923')
+    fig.patch.set_facecolor('#333333')
+    plt.rcParams['text.antialiased'] = False
     
     plt.tight_layout()
     fig.subplots_adjust(top=0.95)  # Adjust the top margin to make space for a main title
@@ -173,7 +207,8 @@ def main():
         if st.checkbox("Sunburst chart, mega cool ale potencjalnie zamuli strone 🤓☝️"):
             st.plotly_chart(sunBurst)
 
-        complexLayoutMatplot()
+        if st.checkbox('ładne'):
+            complexLayoutMatplot()
 
         if st.checkbox("Staty Top 5",value=True):
             col1,col2 = st.columns(2)
