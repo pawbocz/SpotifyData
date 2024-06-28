@@ -111,8 +111,30 @@ def complexLayoutMatplot():
     ax6.text(0, 0.92,s="\nGuzior\nChivas\nKukon\nPROBLEM\nWhite 2115",fontsize=14,ha='left',va='top',color='yellow')
     ax6.set_facecolor('black')
     ax6.axis('off')
+
+
+
     ax10_5 = fig.add_subplot(gs[2, 6:8])
+
+    categories = ['A', 'B', 'C', 'D', 'E']
+    values = [10,20,15,25,30]
+
+    # Plot the bar chart
     
+
+    # Create bars with rounded edges
+    bars = ax10_5.bar(categories, values, color='skyblue', edgecolor='black')
+
+    # Round the bars
+    for bar in bars:
+        bar.set_linewidth(1.5)
+        bar.set_linestyle('-')
+        bar.set_capstyle('round')
+
+    # Add labels and title
+    ax10_5.set_xlabel('Category')
+    ax10_5.set_ylabel('Values')
+    ax10_5.set_title('Random Bar Chart with Rounded Bars')
 
 
     ax7 = fig.add_subplot(gs[1, 6])
