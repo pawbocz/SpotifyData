@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
 from lyricsgenius import Genius
 import requests
@@ -16,12 +17,12 @@ with open("style.css" ) as css:
 def load_data(dane):
     return pd.read_json(dane)
 
-def donut(dane:pd.DataFrame | pd.Series,values,names,title:str,middle_text:str,hole=0.5,**annotations):
-    ponczek = px.pie(dane,values=values,names=names,hole=hole,title=title)
+def donut(dane:pd.DataFrame | pd.Series,values,names,hole=0.5,**annotations):
+    ponczek = px.pie(dane,values=values,names=names,hole=hole)
     if annotations is not None:
-        ponczek.update_layout(annotations=[dict(text=middle_text,x=0.50,y=0.5,font_size=18,showarrow=False)],font=dict(color='black'))
+        ponczek.update_layout(showlegend=False,annotations=[dict(x=0.50,y=0.5,font_size=18,showarrow=False)],font=dict(color='black'))
     else:
-        ponczek.update_layout(annotations=[annotations],font=dict(color='black'))
+        ponczek.update_layout(showlegend=False,annotations=[annotations],font=dict(color='black'))
     return ponczek
 
 def format_minutes(minutes):
@@ -114,69 +115,81 @@ def main():
         artist_play_time['msPlayed'] = round(artist_play_time['msPlayed']/60000,2)
         artist_play_time.columns = ['artistName','minPlayed']
         artist_play_time['HrMinSec'] = pd.to_datetime((artist_play_time['minPlayed'].apply(format_minutes)),format='%H:%M:%S').dt.time
-
-
-        #Sunburst chart filtering
-        artists_to_exclude = track_play_time.groupby('artistName')['minPlayed'].sum()
-        artists_to_exclude = artists_to_exclude[artists_to_exclude <=60].index
-
-        sunData = track_play_time[~track_play_time['artistName'].isin(artists_to_exclude)]
-            
-        sunBurst = px.sunburst(sunData, 
-                  path=['artistName', 'trackName'], 
-                  values='minPlayed', 
-                  title="Rozbłysk słońca (sunburst) wykres artystów i ich piosenek")
-
-        sunCheck = st.checkbox("Sunburst chart, mega cool ale potencjalnie zamuli strone 🤓☝️")
         
-        if sunCheck:
-            st.plotly_chart(sunBurst)
+        top_5_tracks = track_play_time.head(5)
+        others_tracks = pd.DataFrame([{
+            'trackName':'Others',
+            'artistName':'Others',
+            'minPlayed':track_play_time['minPlayed'][5:].sum(),
+            'HrMinSec':format_minutes(track_play_time['minPlayed'][5:].sum())
+            }])
+        
+        top_5_tracks_others = pd.concat([top_5_tracks,others_tracks])
+        
+        top_5_artists = artist_play_time.head(5)
+        others_artists = pd.DataFrame([{
+            'artistName':'Others',
+            'minPlayed':artist_play_time['minPlayed'][5:].sum(),
+            'HrMinSec':format_minutes(artist_play_time['minPlayed'][5:].sum())
+            }])
+        
+        top_5_artist_others = pd.concat([top_5_artists,others_artists])
+        
+        #Tworzenie kolumn i wstawianie 2 grafów 
 
-        if st.checkbox("Staty Top 5",value=True):
-            col1,col2 = st.columns(2)
-            
-            top_5_tracks = track_play_time.head(5)
-            others_tracks = pd.DataFrame([{
-                'trackName':'Others',
-                'artistName':'Others',
-                'minPlayed':track_play_time['minPlayed'][5:].sum(),
-                'HrMinSec':format_minutes(track_play_time['minPlayed'][5:].sum())
-                }])
-            
-            top_5_tracks_others = pd.concat([top_5_tracks,others_tracks])
-            
-            top_5_artists = artist_play_time.head(5)
-            others_artists = pd.DataFrame([{
-                'artistName':'Others',
-                'minPlayed':artist_play_time['minPlayed'][5:].sum(),
-                'HrMinSec':format_minutes(artist_play_time['minPlayed'][5:].sum())
-                }])
-            
-            top_5_artist_others = pd.concat([top_5_artists,others_artists])
-            
-            dfcol1,dfcol3 = st.columns(2,gap="small")
-            with dfcol1:
-                st.markdown("**Wszyscy Artyści których słuchasz**")
-                st.dataframe(artist_play_time,hide_index=True)
-            
-            with dfcol3:
-                st.markdown("**Wszystkie piosenki których słuchałeś**")
-                st.dataframe(track_play_time,hide_index=True)
-            
-            #Tworzenie kolumn i wstawianie 2 grafów 
-            artcol1,artcol2 = st.columns(2)
+        # st.plotly_chart(donut(top_5_artist_others,values='minPlayed',names='artistName',title="Top 5 artystów",middle_text='Top 5 procentowo'))
+        # st.plotly_chart(px.bar(artist_play_time.head(),x='artistName',y='minPlayed',color='minPlayed'))
 
-            with artcol1:
-                st.plotly_chart(donut(top_5_artist_others,values='minPlayed',names='artistName',title="Top 5 artystów",middle_text='Top 5 procentowo'))
-            with artcol2:
-                st.plotly_chart(px.bar(artist_play_time.head(),x='artistName',y='minPlayed',color='minPlayed'))
 
-            songcol1,songcol2 = st.columns(2)
+        # st.plotly_chart(donut(top_5_tracks,values='minPlayed',names='trackName',title="Top 5 tracków",middle_text='Top 5 procentowo'),use_container_width=True)
+        # st.plotly_chart(px.bar(track_play_time.head(),x='trackName',y='minPlayed',color='minPlayed'),use_container_width=True)
 
-            with songcol1:
-                st.plotly_chart(donut(top_5_tracks,values='minPlayed',names='trackName',title="Top 5 tracków",middle_text='Top 5 procentowo'),use_container_width=True)
-            with songcol2:
-                st.plotly_chart(px.bar(track_play_time.head(),x='trackName',y='minPlayed',color='minPlayed'),use_container_width=True)
+
+        ################################################## JEBANY 'GRID' CHUJA DZIAŁA ######################################################################
+        main_columnsTop = st.columns(2)
+
+
+        with main_columnsTop[0]:
+            subColsLeft = st.columns(3)
+            with subColsLeft[0]:
+                con1 = st.container(border=False,height=150)
+                con1.metric("Minutes on Spotify", int(track_play_time['minPlayed'].sum()))
+            with subColsLeft[1]:
+                con2 = st.container(border=False,height=150)
+                con2.metric("Unique Tracks", track_play_time['trackName'].count())
+            with subColsLeft[2]:
+                con1 = st.container(border=False,height=150)
+                con1.metric("Unique Artists", track_play_time['artistName'].nunique())
+            
+            subColsDown = st.columns(1)
+            with subColsDown[0]:
+                con1 = st.container(border=True,height=180)
+                con1.write("COS TAM")
+        
+        with main_columnsTop[1]:
+            subColsRight = st.columns(2)
+            with subColsRight[0]:
+                con1 = st.container(border=False,height=430)
+                con1.image(r'Data\fala.png',use_column_width=True)
+            with subColsRight[1]:
+                top_5_tracks=top_5_tracks.sort_values(by='minPlayed')
+                favTracksBar = go.Figure()
+
+
+        main_columnsMid = st.columns(2)
+        
+        with main_columnsMid[0]:
+            colx = st.container(border=True,height=600)
+            colx.markdown("<h1 style='text-align: center;'>🤓☝️</h1>", unsafe_allow_html=True)
+            
+        with main_columnsMid[1]:
+            subColsRightMid = st.columns(2)
+            with subColsRightMid[0]:
+                con1 = st.container(border=False,height=430)
+                con1.write("elo żelo")
+            with subColsRightMid[1]:
+                con2 = st.container(border=False,height=430)
+                con2.image(r'Data\plesn.png',use_column_width=True)
 
 
 if __name__ == "__main__":
